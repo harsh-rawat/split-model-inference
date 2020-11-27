@@ -29,8 +29,8 @@ if __name__ == '__main__':
         "stride": 2,
         "dropout": 0.1,
         "learning_rate": 5e-4,
-        "batch_size": args.batch,
-        "epochs": args.epochs
+        "batch_size": int(args.batch),
+        "epochs": int(args.epochs)
     }
 
     train_dataset = None
