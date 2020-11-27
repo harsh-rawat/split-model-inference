@@ -1,6 +1,5 @@
 import torch.nn.functional as F
 import torch
-import torchaudio
 import torch.utils.data as data
 import torch.nn as nn
 import os
@@ -37,15 +36,13 @@ def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, i
                        100. * batch_idx / len(train_loader), loss.item()))
 
 
-def train_model(hparams, train_url="train-clean-100", test_url="test-clean"):
+def train_model(hparams, train_dataset, test_dataset):
     use_cuda = torch.cuda.is_available()
     torch.manual_seed(7)
     device = torch.device("cuda" if use_cuda else "cpu")
 
     if not os.path.isdir("./data"):
         os.makedirs("./data")
-
-    train_dataset = torchaudio.datasets.LIBRISPEECH("./data", url=train_url, download=True)
 
     kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
     train_loader = data.DataLoader(dataset=train_dataset,
@@ -73,5 +70,5 @@ def train_model(hparams, train_url="train-clean-100", test_url="test-clean"):
     for epoch in range(1, hparams['epochs'] + 1):
         train(model, device, train_loader, criterion, optimizer, scheduler, epoch, iter_meter)
 
-    evaluate_model(test_url, hparams, model, None)
+    evaluate_model(hparams, model, None, test_dataset)
     return model

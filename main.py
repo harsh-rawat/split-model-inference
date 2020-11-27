@@ -1,6 +1,7 @@
 import argparse
 
 from setup import *
+import torchaudio
 from model.save_load_model import *
 from train_and_test.test import evaluate_model
 from train_and_test.train import train_model
@@ -32,14 +33,19 @@ if __name__ == '__main__':
         "epochs": args.epochs
     }
 
+    train_dataset = None
+    if not args.test:
+        train_dataset = torchaudio.datasets.LIBRISPEECH("./data", url='train-clean-100', download=True)
+    test_dataset = torchaudio.datasets.LIBRISPEECH("./data", url='test-clean', download=True)
+
     save_filepath = '{}/{}'.format(args.path, args.savefile)
     if args.test:
         model = load_model(save_filepath, hparams)
         sp_model = load_split_model(save_filepath, hparams)
         print('Evaluating complete model without any splitting')
-        evaluate_model(hparams, model, None)
+        evaluate_model(hparams, model, None, test_dataset)
         print('Evaluating split model')
-        evaluate_model(hparams, None, sp_model)
+        evaluate_model(hparams, None, sp_model, test_dataset)
     else:
-        model = train_model(hparams)
+        model = train_model(hparams, train_dataset, test_dataset)
         save_model(model, save_filepath)

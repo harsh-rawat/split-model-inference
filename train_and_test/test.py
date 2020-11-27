@@ -46,13 +46,11 @@ def test(model, sp_model, device, test_loader, criterion):
         'Test set: Average loss: {:.4f}, Average CER: {:4f} Average WER: {:.4f}\n'.format(test_loss, avg_cer, avg_wer))
 
 
-def evaluate_model(hparams, model, sp_model, test_url='test-clean'):
+def evaluate_model(hparams, model, sp_model, test_dataset):
     use_cuda = torch.cuda.is_available()
     device = torch.device("cuda" if use_cuda else "cpu")
     if not os.path.isdir("./data"):
         os.makedirs("./data")
-
-    test_dataset = torchaudio.datasets.LIBRISPEECH("./data", url=test_url, download=True)
 
     kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
     test_loader = data.DataLoader(dataset=test_dataset,
