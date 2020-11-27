@@ -70,5 +70,5 @@ def train_model(hparams, train_dataset, test_dataset):
     for epoch in range(1, hparams['epochs'] + 1):
         train(model, device, train_loader, criterion, optimizer, scheduler, epoch, iter_meter)
 
-    evaluate_model(hparams, model, None, test_dataset)
+    evaluate_model(hparams, model, None, test_dataset, None)
     return model

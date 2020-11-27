@@ -2,9 +2,11 @@ import numpy as np
 import torch
 from dahuffman import HuffmanCodec
 
+from encoder.base_encoder import EncoderDecoder
+
 
 # Huffman encoding
-class Huffman:
+class Huffman(EncoderDecoder):
     def __init__(self):
         self.dim = None
         self.codec = None

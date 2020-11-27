@@ -5,10 +5,11 @@ import torch.utils.data as data
 
 from data_processing.data_pipeline import *
 from data_processing.utils import *
+from encoder.base_encoder import EncoderDecoder
 from encoder.huffman import Huffman
 
 
-def test(model, sp_model, device, test_loader, criterion):
+def test(model, sp_model, device, test_loader, criterion, encoder_decoder: EncoderDecoder):
     print('\nevaluating...')
     test_loss = 0
     test_cer, test_wer = [], []
@@ -21,8 +22,7 @@ def test(model, sp_model, device, test_loader, criterion):
             if model is not None:
                 output = model(spectrograms)  # (batch, time, n_class)
             else:
-                intermediate_activations = sp_model[0].forward(spectrograms);  # Pass the input through head model
-                encoder_decoder = Huffman()
+                intermediate_activations = sp_model[0].forward(spectrograms)  # Pass the input through head model
                 intermediate = encoder_decoder.compress(intermediate_activations)
                 # Send this intermediate value to server
                 reconstructed_output = encoder_decoder.decompress(intermediate)
@@ -46,7 +46,7 @@ def test(model, sp_model, device, test_loader, criterion):
         'Test set: Average loss: {:.4f}, Average CER: {:4f} Average WER: {:.4f}\n'.format(test_loss, avg_cer, avg_wer))
 
 
-def evaluate_model(hparams, model, sp_model, test_dataset):
+def evaluate_model(hparams, model, sp_model, test_dataset, encoder_decoder: EncoderDecoder):
     use_cuda = torch.cuda.is_available()
     device = torch.device("cuda" if use_cuda else "cpu")
     if not os.path.isdir("./data"):
@@ -60,4 +60,4 @@ def evaluate_model(hparams, model, sp_model, test_dataset):
                                   **kwargs)
     criterion = nn.CTCLoss(blank=28).to(device)
 
-    test(model, sp_model, device, test_loader, criterion)
+    test(model, sp_model, device, test_loader, criterion, encoder_decoder)
