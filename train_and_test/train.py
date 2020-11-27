@@ -70,7 +70,7 @@ def train_model(hparams, train_url="train-clean-100", test_url="test-clean"):
                                                     anneal_strategy='linear')
 
     iter_meter = IterMeter()
-    for epoch in range(1, hparams.epochs + 1):
+    for epoch in range(1, hparams['epochs'] + 1):
         train(model, device, train_loader, criterion, optimizer, scheduler, epoch, iter_meter)
 
     evaluate_model(test_url, hparams, model, None)
