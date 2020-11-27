@@ -1,13 +1,14 @@
 import argparse
 
 from model.save_load_model import *
+from setup import install_requirements
 from train_and_test.test import evaluate_model
 from train_and_test.train import train_model
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Parameters for split model inference')
-    parser.add_argument('-test', action='store_true', default=False, help='Test mode')
-    parser.add_argument('-path', metavar='base-path', action='store', default='/tmp',
+    parser.add_argument('-test', action='store_true', default=False, required=False, help='Test mode')
+    parser.add_argument('-path', metavar='base-path', action='store', default='/tmp', required=False,
                         help='The base path for the project')
     parser.add_argument('-batch', metavar='Batch Size', action='store', default=10, required=False,
                         help='Batch size to be used in training set')
@@ -31,6 +32,7 @@ if __name__ == '__main__':
         "epochs": args.epochs
     }
 
+    install_requirements()
     save_filepath = '{}/{}'.format(args.path, args.savefile)
     if args.test:
         model = load_model(save_filepath, hparams)
