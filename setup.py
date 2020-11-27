@@ -15,3 +15,6 @@ def install_requirements():
 
 def install(package_name):
     subprocess.run([sys.executable, "-m", "pip", "install", package_name])
+
+
+install_requirements()

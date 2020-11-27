@@ -1,7 +1,7 @@
 import argparse
 
+from setup import *
 from model.save_load_model import *
-from setup import install_requirements
 from train_and_test.test import evaluate_model
 from train_and_test.train import train_model
 
@@ -32,7 +32,6 @@ if __name__ == '__main__':
         "epochs": args.epochs
     }
 
-    install_requirements()
     save_filepath = '{}/{}'.format(args.path, args.savefile)
     if args.test:
         model = load_model(save_filepath, hparams)

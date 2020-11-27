@@ -6,7 +6,6 @@ import torch.utils.data as data
 from data_processing.data_pipeline import *
 from data_processing.utils import *
 from encoder.huffman import Huffman
-from train_and_test.utils import IterMeter
 
 
 def test(model, sp_model, device, test_loader, criterion):
