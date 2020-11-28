@@ -1,7 +1,6 @@
 import argparse
-
-from setup import *
 import torchaudio
+
 from model.save_load_model import *
 from train_and_test.test import evaluate_model
 from train_and_test.train import train_model
