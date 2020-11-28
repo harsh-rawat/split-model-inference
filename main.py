@@ -27,7 +27,7 @@ if __name__ == '__main__':
                         help='No of Epochs for training')
     parser.add_argument('-savefile', metavar='Save File', action='store', default='model.pth', required=False,
                         help='File for saving the checkpoint')
-    parser.add_argument('-encoder', metavar='Save File', action='store', default='huffman', required=False,
+    parser.add_argument('-encoder', metavar='Encoder type', action='store', default='huffman', required=False,
                         help='Encoder to be used encoding in split model inference')
 
     args = parser.parse_args()
