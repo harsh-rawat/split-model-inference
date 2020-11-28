@@ -4,7 +4,8 @@ import sys
 requirements = [
     "torchaudio==0.4.0",
     "torch==1.4.0",
-    "dahuffman"
+    "dahuffman",
+    "numpy"
 ]
 
 
