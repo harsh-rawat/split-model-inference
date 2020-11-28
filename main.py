@@ -1,5 +1,6 @@
 import argparse
 import torchaudio
+from pathlib import Path
 
 from model.save_load_model import *
 from train_and_test.test import evaluate_model
@@ -13,6 +14,12 @@ def get_encoder(encoder_type):
         return Huffman()
     else:
         return None
+
+
+def create_folder(path):
+    directory = Path(path)
+    if not directory.exists() or not directory.is_dir():
+        directory.mkdir(parents=True)
 
 
 if __name__ == '__main__':
@@ -44,10 +51,14 @@ if __name__ == '__main__':
         "epochs": int(args.epochs)
     }
 
+    base_dataset_directory = "{}/dataset".format(args.path)
+    create_folder(base_dataset_directory
+                  )
     train_dataset = None
     if not args.test:
-        train_dataset = torchaudio.datasets.LIBRISPEECH("{}/dataset".format(args.path), url='train-clean-100', download=True)
-    test_dataset = torchaudio.datasets.LIBRISPEECH("{}/dataset".format(args.path), url='test-clean', download=True)
+        train_dataset = torchaudio.datasets.LIBRISPEECH(base_dataset_directory, url='train-clean-100',
+                                                        download=True)
+    test_dataset = torchaudio.datasets.LIBRISPEECH(base_dataset_directory, url='test-clean', download=True)
 
     save_filepath = '{}/{}'.format(args.path, args.savefile)
     if args.test:

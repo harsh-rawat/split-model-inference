@@ -8,6 +8,4 @@ sudo apt update
 
 sudo apt install python3-pip
 
-mkdir data
-
 python setup.py
