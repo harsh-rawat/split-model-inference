@@ -1,6 +1,6 @@
 import torch
 
-from encoder.AutoEncoders import AutoEncoderDecoder
+from model.AutoEncoderDecoder import AutoEncoderDecoder
 from model.split_model import *
 
 

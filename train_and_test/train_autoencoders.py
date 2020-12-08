@@ -5,7 +5,7 @@ import torch.nn as nn
 import torch.utils.data as data
 
 from data_processing.data_pipeline import data_processing
-from encoder.AutoEncoders import AutoEncoderDecoder
+from model.AutoEncoderDecoder import AutoEncoderDecoder
 
 
 def train(sp_model, encoder_model, device, train_loader, criterion, optimizer, scheduler, epoch):
