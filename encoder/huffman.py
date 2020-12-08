@@ -28,7 +28,7 @@ class Huffman(EncoderDecoder):
         # return it
         return encoded
 
-    def decompress(self, x):
+    def decompress(self, x, dim=None):
         # x is an array of 6 values
         # decompress it. So convert 6 values to 24 values.
         decoded = self.coded.decode(x)
@@ -38,5 +38,7 @@ class Huffman(EncoderDecoder):
         decode_tensor = torch.from_numpy(decode_numpy)
 
         # convert x into numpy n-d array using saved shape of tensor. Now the shape of numpy array would be (4,3,2)
+        if dim is not None:
+            self.dim = dim
         ans = torch.reshape(decode_tensor, self.dim)
         return ans

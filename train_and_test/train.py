@@ -1,8 +1,9 @@
-import torch.nn.functional as F
-import torch
-import torch.utils.data as data
-import torch.nn as nn
 import os
+
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import torch.utils.data as data
 
 from data_processing.data_pipeline import data_processing
 from model.base_model import SpeechRecognitionModel

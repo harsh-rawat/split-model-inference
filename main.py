@@ -28,6 +28,10 @@ def create_folder(path):
         directory.mkdir(parents=True)
 
 
+def run_server():
+    pass
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Parameters for split model inference')
     parser.add_argument('-test', action='store_true', default=False, required=False, help='Test mode')
@@ -44,7 +48,8 @@ if __name__ == '__main__':
     parser.add_argument('-encoderpath', metavar='Path of saved autoencoder model', action='store',
                         default='autoencoder.pth', required=False, help='Path of the saved models of autoencoder and '
                                                                         'decoder')
-
+    parser.add_argument('-rank', metavar='Rank of node', action='store', default=0, required=True,
+                        help='Rank of the node')
     args = parser.parse_args()
 
     hparams = {
@@ -64,6 +69,9 @@ if __name__ == '__main__':
         "leaky_relu": 0.2
     }
 
+    if args.rank < 0 or args.rank > 1:
+        raise Exception('Rank is incorrect. It should be either 0 or 1!')
+
     base_dataset_directory = "{}/dataset".format(args.path)
     create_folder(base_dataset_directory)
     train_dataset = None
@@ -75,15 +83,17 @@ if __name__ == '__main__':
     save_filepath = '{}/{}'.format(args.path, args.savefile)
     encoder_base_path = '{}/{}'.format(args.path, args.encoderpath)
     if args.test:
+        if args.rank == 0:
+            run_server()
         model = load_model(save_filepath, hparams)
         sp_model = load_split_model(save_filepath, hparams)
 
         encoder = get_encoder(args.encoder, encoder_base_path)
 
-        print('Evaluating complete model without any splitting')
-        evaluate_model(hparams, model, None, test_dataset, encoder)
+        # print('Evaluating complete model without any splitting')
+        # evaluate_model(hparams, model, None, test_dataset, encoder)
         print('Evaluating split model')
-        evaluate_model(hparams, None, sp_model, test_dataset, encoder)
+        evaluate_model(hparams, None, sp_model, test_dataset, encoder, args.rank)
     else:
         if args.encoder == 'autoencoder':
             sp_model = load_split_model(save_filepath, hparams)
