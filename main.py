@@ -34,6 +34,7 @@ def run_server():
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Parameters for split model inference')
+    parser.add_argument('-split_mode', action='store_true', default=True, required=False, help='Mode - split or full')
     parser.add_argument('-test', action='store_true', default=False, required=False, help='Test mode')
     parser.add_argument('-path', metavar='base-path', action='store', default="./", required=False,
                         help='The base path for the project')
@@ -90,10 +91,12 @@ if __name__ == '__main__':
 
         encoder = get_encoder(args.encoder, encoder_base_path)
 
-        # print('Evaluating complete model without any splitting')
-        # evaluate_model(hparams, model, None, test_dataset, encoder)
-        print('Evaluating split model')
-        evaluate_model(hparams, None, sp_model, test_dataset, encoder, node_rank)
+        if not bool(args.split_mode):
+            print('Evaluating complete model without any splitting')
+            evaluate_model(hparams, model, None, test_dataset, encoder)
+        else:
+            print('Evaluating split model')
+            evaluate_model(hparams, None, sp_model, test_dataset, encoder, node_rank)
     else:
         if args.encoder == 'autoencoder':
             sp_model = load_split_model(save_filepath, hparams)
