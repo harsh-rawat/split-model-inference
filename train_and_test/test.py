@@ -64,11 +64,8 @@ def run_node0(sp_model, device, test_loader, encoder_decoder):
             # Send this intermediate value to server
 
 
-def run_node1_on_receive(sp_model, encoder_decoder, client_data, criterion, test_cer, test_wer):
-    ##########################################################
-    batch_idx = 1;  # Get index of the current received batch
-    intermediate = None;  # Get data sent from node 0
-    ##########################################################
+def run_node1_on_receive(batch_idx, intermediate, sp_model, encoder_decoder, client_data, criterion, test_cer,
+                         test_wer):
     batch_data = client_data[batch_idx]
     reconstructed_output = encoder_decoder.decompress(intermediate, batch_data[0])
 
@@ -79,7 +76,6 @@ def run_node1_on_receive(sp_model, encoder_decoder, client_data, criterion, test
         output = output.transpose(0, 1)  # (time, batch, n_class)
 
         loss = criterion(output, batch_data[1], batch_data[3], batch_data[2])
-        # test_loss += loss.item() / len(test_loader)
 
         decoded_preds, decoded_targets = GreedyDecoder(output.transpose(0, 1), batch_data[1], batch_data[2])
         for j in range(len(decoded_preds)):
@@ -95,7 +91,10 @@ def run_node1(test_loader, sp_model, encoder_decoder, client_data, criterion):
 
     # Run this while we are receiving the inputs
     while (1):
-        loss = run_node1_on_receive(sp_model, encoder_decoder, client_data, criterion, test_cer, test_wer)
+        batch_idx = 1
+        intermediate = None
+        loss = run_node1_on_receive(batch_idx, intermediate, sp_model, encoder_decoder, client_data, criterion,
+                                    test_cer, test_wer)
         test_loss += loss / len(test_loader)
 
     avg_cer = sum(test_cer) / len(test_cer)
