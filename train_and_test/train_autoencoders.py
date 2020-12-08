@@ -8,7 +8,7 @@ from data_processing.data_pipeline import data_processing
 from model.AutoEncoderDecoder import AutoEncoderDecoder
 
 
-def train(sp_model, encoder_model, device, train_loader, criterion, optimizer, scheduler, epoch):
+def train(sp_model, encoder_model, device, train_loader, criterion, optimizer, scheduler, epoch, input_dict):
     sp_model[0].eval()
     encoder_model.train()
     data_len = len(train_loader.dataset)
@@ -19,7 +19,11 @@ def train(sp_model, encoder_model, device, train_loader, criterion, optimizer, s
 
         optimizer.zero_grad()
 
-        split_activations = sp_model[0](spectrograms)
+        if batch_idx not in input_dict.keys():
+            split_activations = sp_model[0](spectrograms)
+            input_dict[batch_idx] = split_activations
+        else:
+            split_activations = input_dict[batch_idx]
         output = encoder_model(split_activations)
 
         loss = criterion(output, split_activations)
@@ -59,7 +63,8 @@ def train_autoencoders(sp_model, hparams, train_dataset):
                                                     epochs=hparams['epochs'],
                                                     anneal_strategy='linear')
 
+    input_dict = dict()
     for epoch in range(1, hparams['epochs'] + 1):
-        train(sp_model, model, device, train_loader, criterion, optimizer, scheduler, epoch)
+        train(sp_model, model, device, train_loader, criterion, optimizer, scheduler, epoch, input_dict)
 
     return model
