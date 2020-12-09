@@ -28,13 +28,14 @@ def create_folder(path):
         directory.mkdir(parents=True)
 
 
-def run_server():
-    pass
-
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Parameters for split model inference')
     parser.add_argument('-split_mode', action='store_true', default=False, required=False, help='Mode - split or full')
+    parser.add_argument('-host', metavar='host', action='store',
+                        default="node0.grp19-cs744-3.uwmadison744-f20-pg0.wisc.cloudlab.us", required=False,
+                        help='Hostname to connect')
+    parser.add_argument('-port', metavar='Batch Size', action='store', default=60009, required=False,
+                        help='Port to be used')
     parser.add_argument('-test', action='store_true', default=False, required=False, help='Test mode')
     parser.add_argument('-path', metavar='base-path', action='store', default="./", required=False,
                         help='The base path for the project')
@@ -52,6 +53,9 @@ if __name__ == '__main__':
     parser.add_argument('-rank', metavar='Rank of node', action='store', default=0, required=False,
                         help='Rank of the node')
     args = parser.parse_args()
+
+    port = int(args.port)
+    host = args.host
 
     hparams = {
         "n_cnn_layers": 3,
@@ -84,8 +88,6 @@ if __name__ == '__main__':
     save_filepath = '{}/{}'.format(args.path, args.savefile)
     encoder_base_path = '{}/{}'.format(args.path, args.encoderpath)
     if args.test:
-        if node_rank == 0:
-            run_server()
         model = load_model(save_filepath, hparams)
         sp_model = load_split_model(save_filepath, hparams)
 
@@ -93,10 +95,10 @@ if __name__ == '__main__':
 
         if not bool(args.split_mode):
             print('Evaluating complete model without any splitting')
-            evaluate_model(hparams, model, None, test_dataset, encoder, node_rank)
+            evaluate_model(hparams, model, None, test_dataset, encoder, node_rank, host, port)
         else:
             print('Evaluating split model')
-            evaluate_model(hparams, None, sp_model, test_dataset, encoder, node_rank)
+            evaluate_model(hparams, None, sp_model, test_dataset, encoder, node_rank, host, port)
     else:
         if args.encoder == 'autoencoder':
             sp_model = load_split_model(save_filepath, hparams)
