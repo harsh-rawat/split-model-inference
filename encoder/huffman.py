@@ -7,14 +7,16 @@ from encoder.base_encoder import EncoderDecoder
 
 # Huffman encoding
 class Huffman(EncoderDecoder):
-    def __init__(self):
-        self.dim = None
-        self.codec = None
+    def __init__(self, shape, codec):
+        self.dim = shape
+        self.codec = codec
 
     def compress(self, x):
         # note down x's dimensions using x.shape. Save this in some variable. Assume x has dimension of
         # (4,3,2) => 24 values
+        print("Huffman encode")
         self.dim = x.shape
+        print("in huffman, shape = {}".format(x.shape))
         # Convert pytorch tensor into numpy array
         tensor = x.numpy()
         # Convert numpy array into a single array
@@ -26,11 +28,13 @@ class Huffman(EncoderDecoder):
         self.coded = HuffmanCodec.from_data(b)
         encoded = self.coded.encode(b)
         # return it
-        return encoded
+        return (encoded, self.dim, self.coded)
 
     def decompress(self, x, dim=None):
         # x is an array of 6 values
         # decompress it. So convert 6 values to 24 values.
+        print("Huffman decode")
+        print("in huffman decode, shape = {}".format(x.shape))
         decoded = self.coded.decode(x)
 
         # Decoded is a list now

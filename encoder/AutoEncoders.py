@@ -7,7 +7,7 @@ class AutoEncoders(EncoderDecoder):
         self.autoencoder = load_autoencoder_model(file_path, input_size, hidden_size, output_size, leaky_relu)
 
     def compress(self, x):
-        return self.autoencoder.encoder(x)
+        return (self.autoencoder.encoder(x), None, None)
 
     def decompress(self, x):
         return self.autoencoder.decoder(x)

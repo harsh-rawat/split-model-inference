@@ -6,10 +6,14 @@ from distributed_setup.client import get_data
 
 
 def run_node1_on_receive(received_data, intermediate, model, sp_model, encoder_decoder, criterion, test_cer,
-                         test_wer):
+                         test_wer, shape, huffman_codec):
     with torch.no_grad():
         if model is None:
-            reconstructed_output = encoder_decoder.decompress(intermediate)
+            if(shape is None): #Autoencoder
+                reconstructed_output = encoder_decoder.decompress(intermediate)
+            else:
+                print("Working with Huffman")
+                reconstructed_output = encoder_decoder.decompress(intermediate, shape, codec)
             output = sp_model[1].forward(reconstructed_output)
         else:
             output = model(intermediate)
@@ -39,8 +43,10 @@ def run_node1(test_loader_len, model, sp_model, encoder_decoder, criterion, serv
         received_data = get_data(conn, batch_idx)
         # Assuming that received data is of the format - [intermediate, labels, label_length, input_length]
         intermediate = received_data[0]
+        shape = received_data[4]
+        huffman_codec = received_data[5]
         loss = run_node1_on_receive(received_data, intermediate, model, sp_model, encoder_decoder, criterion,
-                                    test_cer, test_wer)
+                                    test_cer, test_wer, shape, huffman_codec)
 
         test_loss += loss / test_loader_len
         batch_idx += 1
