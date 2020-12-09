@@ -5,8 +5,8 @@ from distributed_setup.server import *
 def run_node0(model, sp_model, device, test_loader, encoder_decoder, s):
     with torch.no_grad():
         for i, _data in enumerate(test_loader):
-            if i == 1:
-                break
+            # if i == 1:
+            #     break
             spectrograms, labels, input_lengths, label_lengths = _data
             spectrograms, labels = spectrograms.to(device), labels.to(device)
 
