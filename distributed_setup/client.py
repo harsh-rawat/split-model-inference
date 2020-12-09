@@ -22,5 +22,4 @@ def get_data(socket_connection, batch_idx, network_latency_timer: Timer):
     network_latency_timer.record(batch_idx)
 
     data_arr = pickle.loads(b"".join(data))
-    print(data_arr)
     return data_arr

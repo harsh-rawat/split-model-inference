@@ -1,5 +1,5 @@
 import pickle
-import time
+import datetime
 from collections import Counter
 
 
@@ -11,7 +11,7 @@ class Timer:
 
     def record(self, index):
         if index not in self.counter.keys():
-            self.counter[index] = time.time()
+            self.counter[index] = datetime.datetime.now()
 
     def get_record(self, index):
         if index not in self.counter.keys():
