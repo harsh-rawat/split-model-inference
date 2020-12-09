@@ -6,16 +6,13 @@ from distributed_setup.client import get_data
 from utilities.Timer import Timer
 
 
-def run_node1_on_receive(received_data, intermediate, model, sp_model, encoder_decoder, criterion, test_cer,
+def run_node1_on_receive(batch_idx, timers, received_data, intermediate, model, sp_model, encoder_decoder, criterion,
+                         test_cer,
                          test_wer, shape, huffman_codec):
     with torch.no_grad():
         if model is None:
             timers[0].record(batch_idx)
-            if(shape is None): #Autoencoder
-                reconstructed_output = encoder_decoder.decompress(intermediate)
-            else:
-                print("Working with Huffman")
-                reconstructed_output = encoder_decoder.decompress(intermediate, shape, codec)
+            reconstructed_output = encoder_decoder.decompress(intermediate, shape, huffman_codec)
             timers[1].record(batch_idx)
             output = sp_model[1].forward(reconstructed_output)
         else:
@@ -53,7 +50,8 @@ def run_node1(test_loader_len, model, sp_model, encoder_decoder, criterion, serv
         intermediate = received_data[0]
         shape = received_data[4]
         huffman_codec = received_data[5]
-        loss = run_node1_on_receive(received_data, intermediate, model, sp_model, encoder_decoder, criterion,
+        loss = run_node1_on_receive(batch_idx, timers, received_data, intermediate, model, sp_model, encoder_decoder,
+                                    criterion,
                                     test_cer, test_wer, shape, huffman_codec)
 
         test_loss += loss / test_loader_len
@@ -67,4 +65,5 @@ def run_node1(test_loader_len, model, sp_model, encoder_decoder, criterion, serv
         'Test set: Average loss: {:.4f}, Average CER: {:4f} Average WER: {:.4f}\n'.format(test_loss, avg_cer, avg_wer))
     end_to_end_timer.print()
     network_latency_timer.print()
-    decompression_end_timer.find_difference(decompression_start_timer)
+    decompression_start_timer.print()
+    decompression_end_timer.print()

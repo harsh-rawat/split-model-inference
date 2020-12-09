@@ -1,6 +1,5 @@
 import pickle
 import socket
-import time
 
 
 def set_server_connection(port):
@@ -19,10 +18,11 @@ def send_data(s, data):
     s.send(data)
     end_tag = "END"
     print("End: {}".format(end_tag))
-    s.send(end_tag.encode())
+    bytes_sent = s.send(end_tag.encode())
     print('Will start waiting for ack')
     # wait until ACK received from node1
     recv_data = str(s.recv(1024))
     while not recv_data:
         recv_data = str(s.recv(1024))
     print('Acknowledged received: {}'.format(recv_data))
+    return bytes_sent

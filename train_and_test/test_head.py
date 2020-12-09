@@ -26,13 +26,15 @@ def run_node0(model, sp_model, device, test_loader, encoder_decoder, s):
             else:
                 # shape and coder are None here
                 intermediate, shape, coder = spectrograms, None, None
-            
+
             data_to_send = [intermediate, labels, label_lengths, input_lengths, shape, coder]
             print("data size: {}".format(len(data_to_send)))
             network_latency_timer.record(i)
             # Send this intermediate value to server
-            send_data(s, data_to_send)
+            bytes_sent = send_data(s, data_to_send)
+            print("Bytes sent for batch {} are {}".format(i, bytes_sent))
 
     end_to_end_timer.print()
     network_latency_timer.print()
-    compression_end_timer.find_difference(compression_start_timer)
+    compression_start_timer.print()
+    compression_end_timer.print()

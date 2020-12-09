@@ -7,9 +7,9 @@ from encoder.base_encoder import EncoderDecoder
 
 # Huffman encoding
 class Huffman(EncoderDecoder):
-    def __init__(self, shape, codec):
-        self.dim = shape
-        self.codec = codec
+    def __init__(self):
+        self.dim = None
+        self.codec = None
 
     def compress(self, x):
         # note down x's dimensions using x.shape. Save this in some variable. Assume x has dimension of
@@ -25,17 +25,19 @@ class Huffman(EncoderDecoder):
 
         # encode it. Assume you converted 24 values into 6 values.
         # encode with Huffman coding
-        self.coded = HuffmanCodec.from_data(b)
-        encoded = self.coded.encode(b)
+        self.codec = HuffmanCodec.from_data(b)
+        encoded = self.codec.encode(b)
         # return it
-        return (encoded, self.dim, self.coded)
+        return encoded, self.dim, self.codec
 
-    def decompress(self, x, dim=None):
+    def decompress(self, x, dim=None, codec=None):
         # x is an array of 6 values
         # decompress it. So convert 6 values to 24 values.
         print("Huffman decode")
         print("in huffman decode, shape = {}".format(x.shape))
-        decoded = self.coded.decode(x)
+        if codec is not None:
+            self.codec = codec
+        decoded = self.codec.decode(x)
 
         # Decoded is a list now
         decode_numpy = np.asarray(decoded)
