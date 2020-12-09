@@ -32,7 +32,7 @@ def run_node1(test_loader_len, model, sp_model, encoder_decoder, criterion, serv
     test_cer, test_wer = [], []
 
     batch_idx = 0
-    total_batches = test_loader_len
+    total_batches = 1
     # Run this while we are receiving the inputs
     conn, addr = server_socket.accept()
     while batch_idx < total_batches:

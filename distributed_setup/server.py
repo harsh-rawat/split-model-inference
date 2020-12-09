@@ -2,6 +2,7 @@ import pickle
 import socket
 import time
 
+
 def set_server_connection(port):
     server_socket = socket.socket()
     server_self_hostname = socket.gethostname()
