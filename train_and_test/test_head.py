@@ -25,9 +25,10 @@ def run_node0(model, sp_model, device, test_loader, encoder_decoder, s):
                 compression_end_timer.record(i)
             else:
                 # shape and coder are None here
-                intermediate, shape, coder = spectrograms
-
+                intermediate, shape, coder = spectrograms, None, None
+            
             data_to_send = [intermediate, labels, label_lengths, input_lengths, shape, coder]
+            print("data size: {}".format(len(data_to_send)))
             network_latency_timer.record(i)
             # Send this intermediate value to server
             send_data(s, data_to_send)

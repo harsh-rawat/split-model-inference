@@ -19,7 +19,6 @@ def send_data(s, data):
     s.send(data)
     end_tag = "END"
     print("End: {}".format(end_tag))
-    time.sleep(1)
     s.send(end_tag.encode())
     print('Will start waiting for ack')
     # wait until ACK received from node1
