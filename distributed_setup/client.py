@@ -12,9 +12,21 @@ def set_client_connection(host, port):
 def get_data(socket_connection, batch_idx):
     print('fetching data')
     data = []
+    i = 0
+    size = 0
     while True:
+        i += 1
         packet = socket_connection.recv(4096)
-        if not packet:
+        size += len(packet)
+        print("Fetch packet {}".format(i))
+        print(type(packet[-1]))
+        print(packet)
+        print("Size: {}".format(size))
+        # print(str(packet[-1])=='65')
+        if packet[-1]==68 and packet[-2]==78 and packet[-3]==69:
+            print("Last packet {}".format(packet))
+            print("Last packet {}".format(packet[0:-4]))
+            data.append(packet[0:-4])
             break
         data.append(packet)
 
