@@ -5,12 +5,15 @@ from data_processing.utils import *
 from distributed_setup.client import get_data
 
 
-def run_node1_on_receive(received_data, intermediate, sp_model, encoder_decoder, criterion, test_cer,
+def run_node1_on_receive(received_data, intermediate, model, sp_model, encoder_decoder, criterion, test_cer,
                          test_wer):
-    # reconstructed_output = encoder_decoder.decompress(intermediate, batch_data[0])
-    reconstructed_output = intermediate
     with torch.no_grad():
-        output = sp_model[1].forward(reconstructed_output)
+        if model is None:
+            # reconstructed_output = encoder_decoder.decompress(intermediate, batch_data[0])
+            reconstructed_output = intermediate
+            output = sp_model[1].forward(reconstructed_output)
+        else:
+            output = model(intermediate)
 
         output = F.log_softmax(output, dim=2)
         output = output.transpose(0, 1)
@@ -25,7 +28,7 @@ def run_node1_on_receive(received_data, intermediate, sp_model, encoder_decoder,
     return loss.item()
 
 
-def run_node1(test_loader_len, sp_model, encoder_decoder, criterion, server_socket):
+def run_node1(test_loader_len, model, sp_model, encoder_decoder, criterion, server_socket):
     test_loss = 0
     test_cer, test_wer = [], []
 
@@ -38,7 +41,7 @@ def run_node1(test_loader_len, sp_model, encoder_decoder, criterion, server_sock
         # Assuming that received data is of the format - [intermediate, labels, label_length, input_length]
         intermediate = received_data[0]
 
-        loss = run_node1_on_receive(received_data, intermediate, sp_model, encoder_decoder, criterion,
+        loss = run_node1_on_receive(received_data, intermediate, model, sp_model, encoder_decoder, criterion,
                                     test_cer, test_wer)
 
         test_loss += loss / test_loader_len

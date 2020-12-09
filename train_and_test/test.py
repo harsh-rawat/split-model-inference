@@ -6,7 +6,6 @@ from data_processing.data_pipeline import *
 from distributed_setup.client import *
 from distributed_setup.server import *
 from encoder.base_encoder import EncoderDecoder
-from train_and_test.test_entire_model import run_entire_model
 from train_and_test.test_head import run_node0
 from train_and_test.test_tail import run_node1
 
@@ -14,17 +13,13 @@ from train_and_test.test_tail import run_node1
 def test(model, sp_model, device, test_loader, criterion, encoder_decoder: EncoderDecoder, rank, host, port):
     print('\nevaluating...')
 
-    if model is not None:
-        run_entire_model(model, device, test_loader, criterion)
-        return
-
     if rank == 0:
         s = set_client_connection(host, port)
-        run_node0(sp_model, device, test_loader, encoder_decoder, s)
+        run_node0(model, sp_model, device, test_loader, encoder_decoder, s)
         s.close()
     elif rank == 1:
         server_socket = set_server_connection(port)
-        run_node1(len(test_loader), sp_model, encoder_decoder, criterion, server_socket)
+        run_node1(len(test_loader), model, sp_model, encoder_decoder, criterion, server_socket)
 
 
 def evaluate_model(hparams, model, sp_model, test_dataset, encoder_decoder: EncoderDecoder, rank, host, port):
