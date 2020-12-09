@@ -1,6 +1,8 @@
 import pickle
 import socket
 
+from utilities.Timer import Timer
+
 
 def set_client_connection(host, port):
     server_socket = socket.socket()
@@ -9,7 +11,7 @@ def set_client_connection(host, port):
     return server_socket
 
 
-def get_data(socket_connection, batch_idx):
+def get_data(socket_connection, batch_idx, network_latency_timer: Timer):
     print('fetching data')
     data = []
     i = 0
@@ -22,6 +24,7 @@ def get_data(socket_connection, batch_idx):
             data.append(packet[0:-4])
             break
         data.append(packet)
+    network_latency_timer.record(batch_idx)
 
     data_arr = pickle.loads(b"".join(data))
     print('Sending ack from client for batch {}'.format(batch_idx))

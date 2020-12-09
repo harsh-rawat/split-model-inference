@@ -19,6 +19,13 @@ class Timer:
         else:
             return self.counter[index]
 
+    def print(self, data=None):
+        print('This is {} timer'.format(self.name))
+        if data is None:
+            data = self.counter
+        for key in data:
+            print('Batch id {} has time stamp {}'.format(key, self.counter[key]))
+
     def get_timer(self):
         return self.counter
 
@@ -38,4 +45,5 @@ class Timer:
         dict1.subtract(dict2)
         for key in dict1.keys():
             dict1[key] = dict1[key] * 1000
+        self.print(dict1)
         return dict1
