@@ -1,6 +1,6 @@
 import os
 import pickle
-
+import socket
 import torch.nn.functional as F
 import torch.utils.data as data
 
@@ -39,7 +39,7 @@ def run_entire_model(model, device, test_loader, criterion):
 
 def run_node1_client_data(test_loader, device, sp_model):
     client_data = dict()  # In the fomat "1":[shape, labels, label_length, input_lengths]
-    with torch.no_grad:
+    with torch.no_grad():
         for i, _data in enumerate(test_loader):
             spectrograms, labels, input_lengths, label_lengths = _data
             spectrograms, labels = spectrograms.to(device), labels.to(device)
@@ -55,7 +55,7 @@ def run_node1_client_data(test_loader, device, sp_model):
 
 
 def run_node0(sp_model, device, test_loader, encoder_decoder, s):
-    with torch.no_grad:
+    with torch.no_grad():
         for i, _data in enumerate(test_loader):
             spectrograms, labels, input_lengths, label_lengths = _data
             spectrograms, labels = spectrograms.to(device), labels.to(device)
@@ -70,7 +70,7 @@ def run_node1_on_receive(batch_idx, intermediate, sp_model, encoder_decoder, cli
     batch_data = client_data[batch_idx]
     # reconstructed_output = encoder_decoder.decompress(intermediate, batch_data[0])
     reconstructed_output = intermediate
-    with torch.no_grad:
+    with torch.no_grad():
         output = sp_model[1].forward(reconstructed_output)
 
         output = F.log_softmax(output, dim=2)
@@ -123,11 +123,13 @@ def test(model, sp_model, device, test_loader, criterion, encoder_decoder: Encod
         run_node0(sp_model, device, test_loader, encoder_decoder, s)
         s.close()
     elif rank == 1:
+        print('I am rank 1')
         client_data = run_node1_client_data(test_loader, device, sp_model)
         server_socket = socket.socket()
         server_self_hostname = socket.gethostname()
         server_socket.bind(server_self_hostname, port)
         server_socket.listen(5)     # Now wait for client connection
+        print('Server listening....')
         run_node1(test_loader, sp_model, encoder_decoder, client_data, criterion, server_socket)
 
 
