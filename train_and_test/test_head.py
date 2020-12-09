@@ -17,6 +17,7 @@ def run_node0(model, sp_model, device, test_loader, encoder_decoder, s):
                 intermediate = intermediate_activations
             else:
                 intermediate = spectrograms
+                # intermediate = encoder_decoder.compress(intermediate_activations)
 
             data_to_send = [intermediate, labels, label_lengths, input_lengths]
             # Send this intermediate value to server
