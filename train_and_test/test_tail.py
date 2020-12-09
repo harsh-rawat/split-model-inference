@@ -13,6 +13,7 @@ def run_node1_on_receive(received_data, intermediate, model, sp_model, encoder_d
             reconstructed_output = intermediate
             output = sp_model[1].forward(reconstructed_output)
         else:
+            # reconstructed_output = encoder_decoder.decompress(intermediate, batch_data[0])
             output = model(intermediate)
 
         output = F.log_softmax(output, dim=2)
@@ -32,6 +33,7 @@ def run_node1(test_loader_len, model, sp_model, encoder_decoder, criterion, serv
     test_loss = 0
     test_cer, test_wer = [], []
 
+    conn, addr = server_socket.accept()
     batch_idx = 0
     total_batches = test_loader_len
     # Run this while we are receiving the inputs

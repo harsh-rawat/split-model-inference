@@ -19,9 +19,6 @@ def get_data(socket_connection, batch_idx):
         packet = socket_connection.recv(4096)
         size += len(packet)
         print("Fetch packet {}".format(i))
-        print(type(packet[-1]))
-        print(packet)
-        print("Size: {}".format(size))
         # print(str(packet[-1])=='65')
         if packet[-1]==68 and packet[-2]==78 and packet[-3]==69:
             print("Last packet {}".format(packet))
@@ -31,8 +28,8 @@ def get_data(socket_connection, batch_idx):
         data.append(packet)
 
     data_arr = pickle.loads(b"".join(data))
-    print('Sending ack from client for batch {}'.format(batch_idx))
-    ack_text = "This is ACK for batch " + str(batch_idx)
-    socket_connection.send(ack_text.encode())
+    # print('Sending ack from client for batch {}'.format(batch_idx))
+    # ack_text = "This is ACK for batch " + str(batch_idx)
+    # socket_connection.send(ack_text.encode())
 
     return data_arr
