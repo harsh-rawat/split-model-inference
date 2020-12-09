@@ -13,11 +13,9 @@ def run_node0(model, sp_model, device, test_loader, encoder_decoder, s):
             if model is None:
                 # Pass the input through head model
                 intermediate_activations = sp_model[0].forward(spectrograms)
-                # intermediate = encoder_decoder.compress(intermediate_activations)
-                intermediate = intermediate_activations
+                intermediate = encoder_decoder.compress(intermediate_activations)
             else:
                 intermediate = spectrograms
-                # intermediate = encoder_decoder.compress(intermediate_activations)
 
             data_to_send = [intermediate, labels, label_lengths, input_lengths]
             # Send this intermediate value to server

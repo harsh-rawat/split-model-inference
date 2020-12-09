@@ -9,11 +9,9 @@ def run_node1_on_receive(received_data, intermediate, model, sp_model, encoder_d
                          test_wer):
     with torch.no_grad():
         if model is None:
-            # reconstructed_output = encoder_decoder.decompress(intermediate, batch_data[0])
-            reconstructed_output = intermediate
+            reconstructed_output = encoder_decoder.decompress(intermediate)
             output = sp_model[1].forward(reconstructed_output)
         else:
-            # reconstructed_output = encoder_decoder.decompress(intermediate, batch_data[0])
             output = model(intermediate)
 
         output = F.log_softmax(output, dim=2)
