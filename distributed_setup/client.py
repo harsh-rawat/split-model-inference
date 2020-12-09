@@ -19,8 +19,8 @@ def get_data(socket_connection, batch_idx):
         data.append(packet)
 
     data_arr = pickle.loads(b"".join(data))
-    print('Sending ack from client for batch {}'.format(batch_idx))
-    ack_text = "This is ACK for batch " + str(batch_idx)
-    socket_connection.send(ack_text.encode())
+    # print('Sending ack from client for batch {}'.format(batch_idx))
+    # ack_text = "This is ACK for batch " + str(batch_idx)
+    # socket_connection.send(ack_text.encode())
 
     return data_arr
