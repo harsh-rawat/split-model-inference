@@ -37,7 +37,7 @@ def run_node1(test_loader_len, model, sp_model, encoder_decoder, criterion, serv
     batch_idx = 0
     total_batches = test_loader_len
     # Run this while we are receiving the inputs
-    while batch_idx < total_batches:
+    while batch_idx < 1:
         received_data = get_data(conn, batch_idx)
         # Assuming that received data is of the format - [intermediate, labels, label_length, input_length]
         intermediate = received_data[0]
