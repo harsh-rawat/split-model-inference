@@ -1,4 +1,5 @@
 import os
+import pickle
 
 import torch.nn.functional as F
 import torch.utils.data as data
@@ -53,22 +54,22 @@ def run_node1_client_data(test_loader, device, sp_model):
     return client_data
 
 
-def run_node0(sp_model, device, test_loader, encoder_decoder, s, host, port):
+def run_node0(sp_model, device, test_loader, encoder_decoder, s):
     with torch.no_grad:
         for i, _data in enumerate(test_loader):
             spectrograms, labels, input_lengths, label_lengths = _data
             spectrograms, labels = spectrograms.to(device), labels.to(device)
 
             intermediate_activations = sp_model[0].forward(spectrograms)  # Pass the input through head model
-            intermediate = encoder_decoder.compress(intermediate_activations)
+            #intermediate = encoder_decoder.compress(intermediate_activations)
             # Send this intermediate value to server
-            send_node0_results(s, host, port, intermediate_activations)
+            send_node0_results(s, intermediate_activations)
 
 def run_node1_on_receive(batch_idx, intermediate, sp_model, encoder_decoder, client_data, criterion, test_cer,
                          test_wer):
     batch_data = client_data[batch_idx]
     # reconstructed_output = encoder_decoder.decompress(intermediate, batch_data[0])
-
+    reconstructed_output = intermediate
     with torch.no_grad:
         output = sp_model[1].forward(reconstructed_output)
 
@@ -88,15 +89,14 @@ def run_node1_on_receive(batch_idx, intermediate, sp_model, encoder_decoder, cli
 def run_node1(test_loader, sp_model, encoder_decoder, client_data, criterion, server_socket):
     test_loss = 0
     test_cer, test_wer = [], []
-
+    
+    batch_idx = 0
     # Run this while we are receiving the inputs
     while (1):
-        batch_idx = 1
         conn, addr = server_socket.accept()     # Establish connection with client.
-        print('Got connection from {}'.format(addr))
-        data = conn.recv(1024)
-        print('Server received', repr(data))
-        intermediate = data
+        data = conn.recv(50000000)
+        intermediate = pickle.loads(data)
+        print('Intermediate type = {}'.format(type(intermediate)))
         loss = run_node1_on_receive(batch_idx, intermediate, sp_model, encoder_decoder, client_data, criterion,
                                     test_cer, test_wer)
         test_loss += loss / len(test_loader)
@@ -118,15 +118,15 @@ def test(model, sp_model, device, test_loader, criterion, encoder_decoder: Encod
     port = 60009
     if rank == 0:
         s = socket.socket()             # Create a socket object
-        host = "127.0.0.1"              # Get the hostname of node where sending
+        host = "http://node0.grp19-cs744-3.uwmadison744-f20-pg0.wisc.cloudlab.us/"
         s.connect(host, port)
-        run_node0(sp_model, device, test_loader, encoder_decoder, s, host, port)
+        run_node0(sp_model, device, test_loader, encoder_decoder, s)
         s.close()
     elif rank == 1:
         client_data = run_node1_client_data(test_loader, device, sp_model)
         server_socket = socket.socket()
         server_self_hostname = socket.gethostname()
-        server_socket.bind(server_self_hostname, server_socket)
+        server_socket.bind(server_self_hostname, port)
         server_socket.listen(5)     # Now wait for client connection
         run_node1(test_loader, sp_model, encoder_decoder, client_data, criterion, server_socket)
 
@@ -149,6 +149,6 @@ def evaluate_model(hparams, model, sp_model, test_dataset, encoder_decoder: Enco
 
 
 #consider node0 a client
-def send_node0_results(s, host, port, intermediate_activations):
-    string_send = str(intermediate_activations)
-    s.send(string_send.encode())
+def send_node0_results(s, intermediate_activations):
+    string_send = pickle.dumps(intermediate_activations)
+    s.send(string_send)
