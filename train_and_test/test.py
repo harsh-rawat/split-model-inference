@@ -53,7 +53,7 @@ def run_node1_client_data(test_loader, device, sp_model):
     return client_data
 
 
-def run_node0(sp_model, device, test_loader, encoder_decoder):
+def run_node0(sp_model, device, test_loader, encoder_decoder, s, host, port):
     with torch.no_grad:
         for i, _data in enumerate(test_loader):
             spectrograms, labels, input_lengths, label_lengths = _data
@@ -62,12 +62,12 @@ def run_node0(sp_model, device, test_loader, encoder_decoder):
             intermediate_activations = sp_model[0].forward(spectrograms)  # Pass the input through head model
             intermediate = encoder_decoder.compress(intermediate_activations)
             # Send this intermediate value to server
-
+            send_node0_results(s, host, port, intermediate_activations)
 
 def run_node1_on_receive(batch_idx, intermediate, sp_model, encoder_decoder, client_data, criterion, test_cer,
                          test_wer):
     batch_data = client_data[batch_idx]
-    reconstructed_output = encoder_decoder.decompress(intermediate, batch_data[0])
+    # reconstructed_output = encoder_decoder.decompress(intermediate, batch_data[0])
 
     with torch.no_grad:
         output = sp_model[1].forward(reconstructed_output)
@@ -85,14 +85,18 @@ def run_node1_on_receive(batch_idx, intermediate, sp_model, encoder_decoder, cli
     return loss.item()
 
 
-def run_node1(test_loader, sp_model, encoder_decoder, client_data, criterion):
+def run_node1(test_loader, sp_model, encoder_decoder, client_data, criterion, server_socket):
     test_loss = 0
     test_cer, test_wer = [], []
 
     # Run this while we are receiving the inputs
     while (1):
         batch_idx = 1
-        intermediate = None
+        conn, addr = server_socket.accept()     # Establish connection with client.
+        print('Got connection from {}'.format(addr))
+        data = conn.recv(1024)
+        print('Server received', repr(data))
+        intermediate = data
         loss = run_node1_on_receive(batch_idx, intermediate, sp_model, encoder_decoder, client_data, criterion,
                                     test_cer, test_wer)
         test_loss += loss / len(test_loader)
@@ -111,11 +115,20 @@ def test(model, sp_model, device, test_loader, criterion, encoder_decoder: Encod
         run_entire_model(model, device, test_loader, criterion)
         return
 
+    port = 60009
     if rank == 0:
-        run_node0(sp_model, device, test_loader, encoder_decoder)
+        s = socket.socket()             # Create a socket object
+        host = "127.0.0.1"              # Get the hostname of node where sending
+        s.connect(host, port)
+        run_node0(sp_model, device, test_loader, encoder_decoder, s, host, port)
+        s.close()
     elif rank == 1:
         client_data = run_node1_client_data(test_loader, device, sp_model)
-        run_node1(test_loader, sp_model, encoder_decoder, client_data, criterion)
+        server_socket = socket.socket()
+        server_self_hostname = socket.gethostname()
+        server_socket.bind(server_self_hostname, server_socket)
+        server_socket.listen(5)     # Now wait for client connection
+        run_node1(test_loader, sp_model, encoder_decoder, client_data, criterion, server_socket)
 
 
 def evaluate_model(hparams, model, sp_model, test_dataset, encoder_decoder: EncoderDecoder, rank):
@@ -133,3 +146,9 @@ def evaluate_model(hparams, model, sp_model, test_dataset, encoder_decoder: Enco
     criterion = nn.CTCLoss(blank=28).to(device)
 
     test(model, sp_model, device, test_loader, criterion, encoder_decoder, rank)
+
+
+#consider node0 a client
+def send_node0_results(s, host, port, intermediate_activations):
+    string_send = str(intermediate_activations)
+    s.send(string_send.encode())
