@@ -34,7 +34,7 @@ class Huffman(EncoderDecoder):
         # x is an array of 6 values
         # decompress it. So convert 6 values to 24 values.
         print("Huffman decode")
-        print("in huffman decode, shape = {}".format(x.shape))
+        print("in huffman decode, shape = {}".format(dim))
         if codec is not None:
             self.codec = codec
         decoded = self.codec.decode(x)
