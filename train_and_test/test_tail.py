@@ -33,21 +33,17 @@ def run_node1(test_loader_len, model, sp_model, encoder_decoder, criterion, serv
     test_loss = 0
     test_cer, test_wer = [], []
 
-    conn, addr = server_socket.accept()
     batch_idx = 0
     total_batches = test_loader_len
     # Run this while we are receiving the inputs
     conn, addr = server_socket.accept()
     while batch_idx < total_batches:
-        print("loop batch_idx")
         received_data = get_data(conn, batch_idx)
         # Assuming that received data is of the format - [intermediate, labels, label_length, input_length]
         intermediate = received_data[0]
-        print("intermediate received, now processing")
         loss = run_node1_on_receive(received_data, intermediate, model, sp_model, encoder_decoder, criterion,
                                     test_cer, test_wer)
 
-        print("Loss: {}".format(loss))
         test_loss += loss / test_loader_len
         batch_idx += 1
 
