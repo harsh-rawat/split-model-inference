@@ -38,6 +38,8 @@ def run_node1(test_loader_len, model, sp_model, encoder_decoder, criterion, serv
     network_latency_timer = Timer('Network Latency', '')
     decompression_start_timer = Timer('Decompression start compute', '')
     decompression_end_timer = Timer('Decompression end compute', '')
+    inference_start_timer = Timer('Inference Start', '')
+    inference_end_timer = Timer('Inference End', '')
     timers = [decompression_start_timer, decompression_end_timer]
 
     batch_idx = 0
@@ -50,12 +52,14 @@ def run_node1(test_loader_len, model, sp_model, encoder_decoder, criterion, serv
         intermediate = received_data[0]
         shape = received_data[4]
         huffman_codec = received_data[5]
+        inference_start_timer.record(batch_idx)
         loss = run_node1_on_receive(batch_idx, timers, received_data, intermediate, model, sp_model, encoder_decoder,
                                     criterion,
                                     test_cer, test_wer, shape, huffman_codec)
 
         test_loss += loss / test_loader_len
         batch_idx += 1
+        inference_end_timer.record(batch_idx)
         end_to_end_timer.record(batch_idx)
 
     avg_cer = sum(test_cer) / len(test_cer)
@@ -67,3 +71,5 @@ def run_node1(test_loader_len, model, sp_model, encoder_decoder, criterion, serv
     network_latency_timer.print()
     decompression_start_timer.print()
     decompression_end_timer.print()
+    inference_start_timer.print()
+    inference_end_timer.print()
